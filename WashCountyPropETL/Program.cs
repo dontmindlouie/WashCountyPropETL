@@ -20,14 +20,14 @@ namespace WashCountyPropETL
             var possibleSearchTerms = InitializeSearchTerms();
 
             //Verify TaxLotIDs
-
             List<string> taxLotIDResult = VerifyID(possibleSearchTerms);
 
             //Extract Property Data
-
             var propertyData = ExtractPropertyData(taxLotIDResult);
 
             //Save Property Data
+
+
             Console.WriteLine("ETL End");
             Console.ReadLine();
         }
