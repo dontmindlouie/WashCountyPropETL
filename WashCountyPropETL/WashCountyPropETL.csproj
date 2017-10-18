@@ -160,7 +160,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ETLclasses.cs" />
     <Compile Include="Models\RealEstatePropContext.cs" />
     <Compile Include="Models\WashCountyPropStaging.cs" />
     <Compile Include="Program.cs" />

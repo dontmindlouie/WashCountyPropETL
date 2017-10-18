@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Http;
 using HtmlAgilityPack;
+using WashCountyPropETL.Models;
 
 namespace WashCountyPropETL
 {
@@ -26,7 +27,32 @@ namespace WashCountyPropETL
             var propertyData = ExtractPropertyData(taxLotIDResult);
 
             //Save Property Data
-
+            using(var context = new RealEstatePropContext())
+            {
+                context.WashCountyPropStaging.Add(new WashCountyPropStaging {
+                    TaxLotId = propertyData[0]["taxLotID"]
+                    , SiteAddress = propertyData[0]["SiteAddress"]
+                    , PropAcctId = propertyData[0]["PropertyID"]
+                    , PropClass = propertyData[0]["PropertyClass"]
+                    , NeighCode = propertyData[0]["NeighCode"]
+                    , LatLong = propertyData[0]["LatLong"]
+                    , SaleDate = propertyData[0]["SaleDate"]
+                    , SaleInstr = propertyData[0]["SaleInstr"]
+                    , SaleDeed = propertyData[0]["SaleDeed"]
+                    , SalePrice = propertyData[0]["SalePrice"]
+                    , RollDate = propertyData[0]["RollDate"]
+                    , TaxCode = propertyData[0]["TaxCode"]
+                    , MarketLandValue = propertyData[0]["MarketLandValue"]
+                    , MarketBldgValue = propertyData[0]["MarketBuildingValue"]
+                    , SpecialMarketValue = propertyData[0]["SpecialMarketValue"]
+                    , TaxableAssessedValue = propertyData[0]["TaxableAssessedValue"]
+                    , Legal = propertyData[0]["TaxableAssessedValue"]
+                    , LotSize = propertyData[0]["LotSize"]
+                    , BldgArea = propertyData[0]["BldgSqFt"]
+                    , YearBuilt = propertyData[0]["YearBuilt"]
+                    });
+                context.SaveChanges();
+            }
 
             Console.WriteLine("ETL End");
             Console.ReadLine();
@@ -85,8 +111,8 @@ namespace WashCountyPropETL
         public static List<Dictionary<string, string>> ExtractPropertyData(List<string> validTaxLotIDs)
         {
             var PropertiesInfo = new List<Dictionary<string, string>>() { };
-            for (var i = 0; i < validTaxLotIDs.Count(); i++) //Loop through extracting property data
-            {
+            //for (var i = 0; i < validTaxLotIDs.Count(); i++){ //Loop through extracting property data
+            
                 HtmlWeb hw = new HtmlWeb();
                 HtmlDocument htmlDoc = hw.Load("http://washims.co.washington.or.us/GIS/index.cfm?id=30&sid=3&IDValue=" + validTaxLotIDs[0]);
                 HtmlNodeCollection siteAddressNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[3]//tr[2]/td[2]");
@@ -154,7 +180,7 @@ namespace WashCountyPropETL
                     , {"YearBuilt", yearBuilt.ElementAt(0) }
                 };
                 PropertiesInfo.Add(PropertyInfo);
-            }
+            //}
             return PropertiesInfo;
         }
 
