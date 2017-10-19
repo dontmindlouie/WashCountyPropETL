@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Http;
 using HtmlAgilityPack;
@@ -27,10 +28,13 @@ namespace WashCountyPropETL
             var propertyData = ExtractPropertyData(taxLotIDResult);
 
             //Save Property Data
+            // Parameters: propertyData
             using(var context = new RealEstatePropContext())
             {
                 context.WashCountyPropStaging.Add(new WashCountyPropStaging {
                     TaxLotId = propertyData[0]["taxLotID"]
+                    , ExtractDateTime = DateTime.Now
+                    , Source = "WashingtonCountyWebsite"
                     , SiteAddress = propertyData[0]["SiteAddress"]
                     , PropAcctId = propertyData[0]["PropertyID"]
                     , PropClass = propertyData[0]["PropertyClass"]
@@ -77,7 +81,7 @@ namespace WashCountyPropETL
         {
             var searchTerm = possibleTaxLots[0][0];
             var validTaxLots = new List<string>();
-
+            //begin loops
             string rawHtmlIDList = SearchValidTaxlotIDs(searchTerm).Result;
             HtmlDocument htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(rawHtmlIDList);
@@ -86,6 +90,10 @@ namespace WashCountyPropETL
             bool resultCap = false;
             resultCap = rawHtmlIDList.Contains("Search exceeded the maximum return limit.");
             validTaxLots.AddRange(rawValidTaxLotIDs);
+            Thread.Sleep(1000); //wait 1 sec to prevent DDOSing
+            Console.WriteLine($"VerifyID Time : {DateTime.Now}");
+            //end loop
+
             return validTaxLots;
         }
         public static async Task<string> SearchValidTaxlotIDs(string searchTerm)
@@ -180,6 +188,9 @@ namespace WashCountyPropETL
                     , {"YearBuilt", yearBuilt.ElementAt(0) }
                 };
                 PropertiesInfo.Add(PropertyInfo);
+
+                Thread.Sleep(1000); //wait 1 sec to prevent DDOSing
+                Console.WriteLine($"Extract Data Time : {DateTime.Now}");
             //}
             return PropertiesInfo;
         }
