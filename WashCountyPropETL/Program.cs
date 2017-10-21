@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Http;
 using HtmlAgilityPack;
+using Microsoft.EntityFrameworkCore;
 using WashCountyPropETL.Models;
 
 namespace WashCountyPropETL
@@ -28,35 +29,41 @@ namespace WashCountyPropETL
             var propertyData = ExtractPropertyData(taxLotIDResult);
 
             //Save Property Data
-            // Parameters: propertyData
+            SavePropertyData(propertyData);
+            /*
             using(var context = new RealEstatePropContext())
             {
-                context.WashCountyPropStaging.Add(new WashCountyPropStaging {
-                    TaxLotId = propertyData[0]["taxLotID"]
-                    , ExtractDateTime = DateTime.Now
-                    , Source = "WashingtonCountyWebsite"
-                    , SiteAddress = propertyData[0]["SiteAddress"]
-                    , PropAcctId = propertyData[0]["PropertyID"]
-                    , PropClass = propertyData[0]["PropertyClass"]
-                    , NeighCode = propertyData[0]["NeighCode"]
-                    , LatLong = propertyData[0]["LatLong"]
-                    , SaleDate = propertyData[0]["SaleDate"]
-                    , SaleInstr = propertyData[0]["SaleInstr"]
-                    , SaleDeed = propertyData[0]["SaleDeed"]
-                    , SalePrice = propertyData[0]["SalePrice"]
-                    , RollDate = propertyData[0]["RollDate"]
-                    , TaxCode = propertyData[0]["TaxCode"]
-                    , MarketLandValue = propertyData[0]["MarketLandValue"]
-                    , MarketBldgValue = propertyData[0]["MarketBuildingValue"]
-                    , SpecialMarketValue = propertyData[0]["SpecialMarketValue"]
-                    , TaxableAssessedValue = propertyData[0]["TaxableAssessedValue"]
-                    , Legal = propertyData[0]["TaxableAssessedValue"]
-                    , LotSize = propertyData[0]["LotSize"]
-                    , BldgArea = propertyData[0]["BldgSqFt"]
-                    , YearBuilt = propertyData[0]["YearBuilt"]
+                for (var i = 0; i < propertyData.Count; i++)
+                {
+                    context.WashCountyPropStaging.Add(new WashCountyPropStaging
+                    {
+                        TaxLotId = propertyData[i]["taxLotID"],
+                        Source = "WashingtonCountyWebsite",
+                        SiteAddress = propertyData[i]["SiteAddress"],
+                        ExtractDateTime = DateTime.Now,
+                        PropAcctId = propertyData[i]["PropertyID"],
+                        PropClass = propertyData[i]["PropertyClass"],
+                        NeighCode = propertyData[i]["NeighCode"],
+                        LatLong = propertyData[i]["LatLong"],
+                        SaleDate = propertyData[i]["SaleDate"],
+                        SaleInstr = propertyData[i]["SaleInstr"],
+                        SaleDeed = propertyData[i]["SaleDeed"],
+                        SalePrice = propertyData[i]["SalePrice"],
+                        RollDate = propertyData[i]["RollDate"],
+                        TaxCode = propertyData[i]["TaxCode"],
+                        MarketLandValue = propertyData[i]["MarketLandValue"],
+                        MarketBldgValue = propertyData[i]["MarketBuildingValue"],
+                        SpecialMarketValue = propertyData[i]["SpecialMarketValue"],
+                        TaxableAssessedValue = propertyData[i]["TaxableAssessedValue"],
+                        Legal = propertyData[i]["TaxableAssessedValue"],
+                        LotSize = propertyData[i]["LotSize"],
+                        BldgArea = propertyData[i]["BldgSqFt"],
+                        YearBuilt = propertyData[i]["YearBuilt"]
                     });
+                }
                 context.SaveChanges();
             }
+            */
 
             Console.WriteLine("ETL End");
             Console.ReadLine();
@@ -90,7 +97,7 @@ namespace WashCountyPropETL
             bool resultCap = false;
             resultCap = rawHtmlIDList.Contains("Search exceeded the maximum return limit.");
             validTaxLots.AddRange(rawValidTaxLotIDs);
-            Thread.Sleep(1000); //wait 1 sec to prevent DDOSing
+            Thread.Sleep(100); //wait .1 sec to prevent DDOSing
             Console.WriteLine($"VerifyID Time : {DateTime.Now}");
             //end loop
 
@@ -119,6 +126,7 @@ namespace WashCountyPropETL
         public static List<Dictionary<string, string>> ExtractPropertyData(List<string> validTaxLotIDs)
         {
             var PropertiesInfo = new List<Dictionary<string, string>>() { };
+            for (var i = 0; i < 5; i++){ //testing
             //for (var i = 0; i < validTaxLotIDs.Count(); i++){ //Loop through extracting property data
             
                 HtmlWeb hw = new HtmlWeb();
@@ -189,11 +197,45 @@ namespace WashCountyPropETL
                 };
                 PropertiesInfo.Add(PropertyInfo);
 
-                Thread.Sleep(1000); //wait 1 sec to prevent DDOSing
+                Thread.Sleep(100); //wait 1 sec to prevent DDOSing
                 Console.WriteLine($"Extract Data Time : {DateTime.Now}");
-            //}
+            }
             return PropertiesInfo;
         }
-
+        public static void SavePropertyData(List<Dictionary<string, string>> propertyDataSave)
+        {
+            using (var context = new RealEstatePropContext())
+            {
+                for (var i = 0; i < propertyDataSave.Count; i++)
+                {
+                    context.WashCountyPropStaging.Add(new WashCountyPropStaging
+                    {
+                        TaxLotId = propertyDataSave[i]["taxLotID"],
+                        Source = "WashingtonCountyWebsite",
+                        SiteAddress = propertyDataSave[i]["SiteAddress"],
+                        ExtractDateTime = DateTime.Now,
+                        PropAcctId = propertyDataSave[i]["PropertyID"],
+                        PropClass = propertyDataSave[i]["PropertyClass"],
+                        NeighCode = propertyDataSave[i]["NeighCode"],
+                        LatLong = propertyDataSave[i]["LatLong"],
+                        SaleDate = propertyDataSave[i]["SaleDate"],
+                        SaleInstr = propertyDataSave[i]["SaleInstr"],
+                        SaleDeed = propertyDataSave[i]["SaleDeed"],
+                        SalePrice = propertyDataSave[i]["SalePrice"],
+                        RollDate = propertyDataSave[i]["RollDate"],
+                        TaxCode = propertyDataSave[i]["TaxCode"],
+                        MarketLandValue = propertyDataSave[i]["MarketLandValue"],
+                        MarketBldgValue = propertyDataSave[i]["MarketBuildingValue"],
+                        SpecialMarketValue = propertyDataSave[i]["SpecialMarketValue"],
+                        TaxableAssessedValue = propertyDataSave[i]["TaxableAssessedValue"],
+                        Legal = propertyDataSave[i]["TaxableAssessedValue"],
+                        LotSize = propertyDataSave[i]["LotSize"],
+                        BldgArea = propertyDataSave[i]["BldgSqFt"],
+                        YearBuilt = propertyDataSave[i]["YearBuilt"]
+                    });
+                }
+                context.SaveChanges();
+            }
+        }
     }
 }
