@@ -16,8 +16,8 @@ namespace WashCountyPropETL
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Start Washington County Property");
-            Console.ReadLine();
+            Console.WriteLine("Washington County Property ETL");
+
 
             //Possible TaxLotIDs
             var possibleSearchTerms = InitializeSearchTerms();
@@ -30,40 +30,6 @@ namespace WashCountyPropETL
 
             //Save Property Data
             SavePropertyData(propertyData);
-            /*
-            using(var context = new RealEstatePropContext())
-            {
-                for (var i = 0; i < propertyData.Count; i++)
-                {
-                    context.WashCountyPropStaging.Add(new WashCountyPropStaging
-                    {
-                        TaxLotId = propertyData[i]["taxLotID"],
-                        Source = "WashingtonCountyWebsite",
-                        SiteAddress = propertyData[i]["SiteAddress"],
-                        ExtractDateTime = DateTime.Now,
-                        PropAcctId = propertyData[i]["PropertyID"],
-                        PropClass = propertyData[i]["PropertyClass"],
-                        NeighCode = propertyData[i]["NeighCode"],
-                        LatLong = propertyData[i]["LatLong"],
-                        SaleDate = propertyData[i]["SaleDate"],
-                        SaleInstr = propertyData[i]["SaleInstr"],
-                        SaleDeed = propertyData[i]["SaleDeed"],
-                        SalePrice = propertyData[i]["SalePrice"],
-                        RollDate = propertyData[i]["RollDate"],
-                        TaxCode = propertyData[i]["TaxCode"],
-                        MarketLandValue = propertyData[i]["MarketLandValue"],
-                        MarketBldgValue = propertyData[i]["MarketBuildingValue"],
-                        SpecialMarketValue = propertyData[i]["SpecialMarketValue"],
-                        TaxableAssessedValue = propertyData[i]["TaxableAssessedValue"],
-                        Legal = propertyData[i]["TaxableAssessedValue"],
-                        LotSize = propertyData[i]["LotSize"],
-                        BldgArea = propertyData[i]["BldgSqFt"],
-                        YearBuilt = propertyData[i]["YearBuilt"]
-                    });
-                }
-                context.SaveChanges();
-            }
-            */
 
             Console.WriteLine("ETL End");
             Console.ReadLine();
@@ -74,7 +40,7 @@ namespace WashCountyPropETL
             {
                 new List<string> {"1", "2", "3" }
                 , new List<string> {"N", "S" }
-                , new List<string> {"0", "1", "2", "3", "4", "5", "6" }
+                , new List<string> {"1", "2", "3", "4", "5", "6" }
                 , new List<string> {"0", "1", "2", "3" }
                 , new List<string> {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9" }
                 , new List<string> {"0", "A", "B", "C", "D" }
@@ -86,21 +52,83 @@ namespace WashCountyPropETL
         }
         public static List<string> VerifyID(List<List<string>> possibleTaxLots)
         {
-            var searchTerm = possibleTaxLots[0][0];
-            var validTaxLots = new List<string>();
-            //begin loops
-            string rawHtmlIDList = SearchValidTaxlotIDs(searchTerm).Result;
-            HtmlDocument htmlDoc = new HtmlDocument();
-            htmlDoc.LoadHtml(rawHtmlIDList);
-            HtmlNodeCollection taxLotIDNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table//tr/td/table//tr//td//a");
-            var rawValidTaxLotIDs = taxLotIDNode.Select(node => node.InnerText).ToList();
-            bool resultCap = false;
-            resultCap = rawHtmlIDList.Contains("Search exceeded the maximum return limit.");
-            validTaxLots.AddRange(rawValidTaxLotIDs);
-            Thread.Sleep(100); //wait .1 sec to prevent DDOSing
-            Console.WriteLine($"VerifyID Time : {DateTime.Now}");
-            //end loop
+            string startTaxLot = "1";
+            Console.WriteLine("Starting TaxLotID (Default = 1): ");
+            startTaxLot = Console.ReadLine();
+            
+            int loopcount = 1;
+            Console.WriteLine("Enter number of verification loops (Default = 1): ");
+            loopcount = Convert.ToInt32(Console.ReadLine());
 
+            int group = startTaxLot.Count()-1;
+            int subgroup = possibleTaxLots[group].IndexOf(Convert.ToString(startTaxLot.Last()));
+            var validTaxLots = new List<string>();
+            bool resultCap = false;
+            bool searchFailure = false;
+            string searchTerm = startTaxLot;
+
+            /*
+            Find the next valid taxlotID:
+            Loop
+                Search the first tChar from the first tGroup.
+                If searchTaxLotIDs is 1 character long and Char is at the end of the list, exit the while loop by changing savedTaxLotIDs to be equal to the maxTaxLotIDs. 
+                Else if Result >= 200, then move to next Group and then search the first tChar
+                Else if Result < 200 and not end of tChar, then save savedtaxLotIDs, then search the next tChar
+                Else if Result < 200 and end of tChar, then while the searchTaxLotIDs is at end of char list, search previous tGroup. Then search the next tChar.
+                Else throw an error.
+            */
+
+            for (int i = 0; i < loopcount; i++)
+            {
+                Thread.Sleep(10);
+                //Extract valid taxlotIDs
+                string rawHtmlIDList = SearchValidTaxlotIDs(searchTerm).Result;
+                resultCap = rawHtmlIDList.Contains("Search exceeded the maximum return limit.");
+                searchFailure = rawHtmlIDList.Contains("No Records Found");
+                Console.WriteLine($"search term: {searchTerm}");
+                //Console.WriteLine($"search failure: {searchFailure} | resultCap: {resultCap}");
+
+                if (resultCap == false & searchFailure == false) //validate
+                {
+                    HtmlDocument htmlDoc = new HtmlDocument();
+                    htmlDoc.LoadHtml(rawHtmlIDList);
+                    HtmlNodeCollection taxLotIDNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table//tr/td/table//tr//td//a");
+                    var rawValidTaxLotIDs = taxLotIDNode.Select(node => node.InnerText).ToList();
+                    validTaxLots.AddRange(rawValidTaxLotIDs);
+                    Console.WriteLine($"VerifyID Time : {DateTime.Now} at possibleTaxLots");
+                }
+                if (resultCap == true) //step out
+                {
+                    group++;
+                    subgroup = 0;
+                    searchTerm = String.Concat(searchTerm, possibleTaxLots[group][subgroup]);
+                }
+                else if (subgroup == possibleTaxLots[group].Count() - 1) //step in & step up
+                {
+                    while (searchTerm.Last() == Convert.ToChar(possibleTaxLots[group].Last()))
+                    {
+                        searchTerm = searchTerm.Remove(searchTerm.Count() - 1);
+                        group--;
+                    }
+                    subgroup = possibleTaxLots[group].IndexOf(Convert.ToString(searchTerm.Last()));
+                    searchTerm = searchTerm.Remove(searchTerm.Count() - 1);
+                    subgroup++;
+                    searchTerm = String.Concat(searchTerm, possibleTaxLots[group][subgroup]);
+                }
+                else if (searchFailure == true) //step up
+                {
+                    searchTerm = searchTerm.Remove(searchTerm.Count() - 1);
+                    subgroup++;
+                    searchTerm = String.Concat(searchTerm, possibleTaxLots[group][subgroup]);
+                }
+                else if (resultCap == false & searchFailure == false) //step up
+                {
+                    searchTerm = searchTerm.Remove(searchTerm.Count() - 1);
+                    subgroup++;
+                    searchTerm = String.Concat(searchTerm, possibleTaxLots[group][subgroup]);
+                }
+                //else { Console.WriteLine("TaxlotID verification failed"); }
+            }
             return validTaxLots;
         }
         public static async Task<string> SearchValidTaxlotIDs(string searchTerm)
@@ -126,11 +154,12 @@ namespace WashCountyPropETL
         public static List<Dictionary<string, string>> ExtractPropertyData(List<string> validTaxLotIDs)
         {
             var PropertiesInfo = new List<Dictionary<string, string>>() { };
-            for (var i = 0; i < 5; i++){ //testing
-            //for (var i = 0; i < validTaxLotIDs.Count(); i++){ //Loop through extracting property data
-            
+            for (var i = 0; i < validTaxLotIDs.Count()-1; i++)
+            { 
                 HtmlWeb hw = new HtmlWeb();
-                HtmlDocument htmlDoc = hw.Load("http://washims.co.washington.or.us/GIS/index.cfm?id=30&sid=3&IDValue=" + validTaxLotIDs[0]);
+                HtmlDocument htmlDoc = hw.Load("http://washims.co.washington.or.us/GIS/index.cfm?id=30&sid=3&IDValue=" + validTaxLotIDs[i]);
+                HtmlNodeCollection taxLotIDNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[3]//tr[3]/td[2]");
+                var taxLotID = taxLotIDNode.Select(node => node.InnerText);
                 HtmlNodeCollection siteAddressNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[3]//tr[2]/td[2]");
                 var siteAddress = siteAddressNode.Select(node => node.InnerText);
                 HtmlNodeCollection propertyIDNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[3]//tr[4]/td[2]");
@@ -173,7 +202,7 @@ namespace WashCountyPropETL
                 var yearBuilt = yearBuiltNode.Select(node => node.InnerText);
 
                 var PropertyInfo = new Dictionary<string, string>() {
-                    {"taxLotID", validTaxLotIDs[0] }
+                    {"taxLotID", taxLotID.ElementAt(0) }
                     , {"SiteAddress", siteAddress.ElementAt(0) }
                     , {"PropertyID", propertyID.ElementAt(0) }
                     , {"PropertyClass", propertyClass.ElementAt(0) }
@@ -184,7 +213,7 @@ namespace WashCountyPropETL
                     , {"SaleDeed", saleDeed.ElementAt(0) }
                     , {"SalePrice", salePrice.ElementAt(0) }
                     , {"RollDate", rollDate.ElementAt(0) }
-                    , {"TaxCode", rollDate.ElementAt(0)}
+                    , {"TaxCode", taxCode.ElementAt(0)}
                     , {"MarketLandValue", marketLandValue.ElementAt(0) }
                     , {"MarketBuildingValue", marketBldgValue.ElementAt(0) }
                     , {"SpecialMarketValue", specialMarketValue.ElementAt(0) }
@@ -197,7 +226,7 @@ namespace WashCountyPropETL
                 };
                 PropertiesInfo.Add(PropertyInfo);
 
-                Thread.Sleep(100); //wait 1 sec to prevent DDOSing
+                Thread.Sleep(10); //wait 1 sec to prevent DDOSing
                 Console.WriteLine($"Extract Data Time : {DateTime.Now}");
             }
             return PropertiesInfo;
@@ -228,7 +257,7 @@ namespace WashCountyPropETL
                         MarketBldgValue = propertyDataSave[i]["MarketBuildingValue"],
                         SpecialMarketValue = propertyDataSave[i]["SpecialMarketValue"],
                         TaxableAssessedValue = propertyDataSave[i]["TaxableAssessedValue"],
-                        Legal = propertyDataSave[i]["TaxableAssessedValue"],
+                        Legal = propertyDataSave[i]["Legal"],
                         LotSize = propertyDataSave[i]["LotSize"],
                         BldgArea = propertyDataSave[i]["BldgSqFt"],
                         YearBuilt = propertyDataSave[i]["YearBuilt"]
