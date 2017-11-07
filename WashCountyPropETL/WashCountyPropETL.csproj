@@ -161,6 +161,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\RealEstatePropContext.cs" />
+    <Compile Include="Models\WashCountyProp.cs" />
     <Compile Include="Models\WashCountyPropStaging.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

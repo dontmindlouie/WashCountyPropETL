@@ -5,6 +5,11 @@ namespace WashCountyPropETL.Models
 {
     public partial class WashCountyPropStaging
     {
+        public WashCountyPropStaging()
+        {
+            WashCountyProp = new HashSet<WashCountyProp>();
+        }
+
         public int StagingId { get; set; }
         public DateTime? ExtractDateTime { get; set; }
         public string Source { get; set; }
@@ -28,5 +33,7 @@ namespace WashCountyPropETL.Models
         public string LotSize { get; set; }
         public string BldgArea { get; set; }
         public string YearBuilt { get; set; }
+
+        public virtual ICollection<WashCountyProp> WashCountyProp { get; set; }
     }
 }
