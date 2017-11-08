@@ -13,22 +13,21 @@ namespace WashCountyPropETL
 {
     class Program
     {
-
         static void Main(string[] args)
         {
-            Console.WriteLine("Washington County Property ETL");
-
-
-            //Possible TaxLotIDs
+            //Welcome to my real estate property web data scraper
+            Console.WriteLine("Washington County Property ETL"); 
+            
+            //Initialize all possible search terms
             var possibleSearchTerms = InitializeSearchTerms();
 
-            //Verify TaxLotIDs
+            //Verify the taxlot IDs by searching through each possible search term
             List<string> taxLotIDResult = VerifyID(possibleSearchTerms);
 
-            //Extract Property Data
+            //Extract the property data with the verified taxlot IDs
             var propertyData = ExtractPropertyData(taxLotIDResult);
 
-            //Save Property Data
+            //Save property data to the database
             SavePropertyData(propertyData);
 
             Console.WriteLine("ETL End");
@@ -67,28 +66,18 @@ namespace WashCountyPropETL
             bool searchFailure = false;
             string searchTerm = startTaxLot;
 
-            /*
-            Find the next valid taxlotID:
-            Loop
-                Search the first tChar from the first tGroup.
-                If searchTaxLotIDs is 1 character long and Char is at the end of the list, exit the while loop by changing savedTaxLotIDs to be equal to the maxTaxLotIDs. 
-                Else if Result >= 200, then move to next Group and then search the first tChar
-                Else if Result < 200 and not end of tChar, then save savedtaxLotIDs, then search the next tChar
-                Else if Result < 200 and end of tChar, then while the searchTaxLotIDs is at end of char list, search previous tGroup. Then search the next tChar.
-                Else throw an error.
-            */
-
+            //Traverse the county website's property search API to figure out which taxlots are valid
             for (int i = 0; i < loopcount; i++)
             {
-                Thread.Sleep(10);
-                //Extract valid taxlotIDs
+                Thread.Sleep(10); //prevent DDOSing
                 string rawHtmlIDList = SearchValidTaxlotIDs(searchTerm).Result;
                 resultCap = rawHtmlIDList.Contains("Search exceeded the maximum return limit.");
                 searchFailure = rawHtmlIDList.Contains("No Records Found");
                 Console.WriteLine($"search term: {searchTerm}");
                 //Console.WriteLine($"search failure: {searchFailure} | resultCap: {resultCap}");
 
-                if (resultCap == false & searchFailure == false) //validate
+                //Valid search results: verify and record taxLot IDs
+                if (resultCap == false & searchFailure == false) 
                 {
                     HtmlDocument htmlDoc = new HtmlDocument();
                     htmlDoc.LoadHtml(rawHtmlIDList);
@@ -97,13 +86,15 @@ namespace WashCountyPropETL
                     validTaxLots.AddRange(rawValidTaxLotIDs);
                     Console.WriteLine($"VerifyID Time : {DateTime.Now} at possibleTaxLots");
                 }
-                if (resultCap == true) //step out
+                //Excessive number of results: step out
+                if (resultCap == true) 
                 {
                     group++;
                     subgroup = 0;
                     searchTerm = String.Concat(searchTerm, possibleTaxLots[group][subgroup]);
                 }
-                else if (subgroup == possibleTaxLots[group].Count() - 1) //step in & step up
+                //End of possible search term subgroup: step in & step up
+                else if (subgroup == possibleTaxLots[group].Count() - 1) 
                 {
                     while (searchTerm.Last() == Convert.ToChar(possibleTaxLots[group].Last()))
                     {
@@ -115,13 +106,15 @@ namespace WashCountyPropETL
                     subgroup++;
                     searchTerm = String.Concat(searchTerm, possibleTaxLots[group][subgroup]);
                 }
-                else if (searchFailure == true) //step up
+                //Empty result: step up
+                else if (searchFailure == true)
                 {
                     searchTerm = searchTerm.Remove(searchTerm.Count() - 1);
                     subgroup++;
                     searchTerm = String.Concat(searchTerm, possibleTaxLots[group][subgroup]);
                 }
-                else if (resultCap == false & searchFailure == false) //step up
+                //Valid search results: step up
+                else if (resultCap == false & searchFailure == false)
                 {
                     searchTerm = searchTerm.Remove(searchTerm.Count() - 1);
                     subgroup++;
@@ -133,6 +126,7 @@ namespace WashCountyPropETL
         }
         public static async Task<string> SearchValidTaxlotIDs(string searchTerm)
         {
+            //RESTful API to automate search function
             var responseString = "";
             using (var client = new HttpClient())
             {
@@ -153,6 +147,7 @@ namespace WashCountyPropETL
         }
         public static List<Dictionary<string, string>> ExtractPropertyData(List<string> validTaxLotIDs)
         {
+            //HTMLAgilityPack and XPath to extract detailed property data
             var PropertiesInfo = new List<Dictionary<string, string>>() { };
             for (var i = 0; i < validTaxLotIDs.Count()-1; i++)
             { 
@@ -226,13 +221,14 @@ namespace WashCountyPropETL
                 };
                 PropertiesInfo.Add(PropertyInfo);
 
-                Thread.Sleep(10); //wait 1 sec to prevent DDOSing
+                Thread.Sleep(10); //wait to prevent DDOSing
                 Console.WriteLine($"Extract Data Time : {DateTime.Now}");
             }
             return PropertiesInfo;
         }
         public static void SavePropertyData(List<Dictionary<string, string>> propertyDataSave)
         {
+            //Entity Framework Core to save property data into SQL server database
             using (var context = new RealEstatePropContext())
             {
                 for (var i = 0; i < propertyDataSave.Count; i++)
