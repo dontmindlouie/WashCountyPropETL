@@ -156,45 +156,45 @@ namespace WashCountyPropETL
                 HtmlNodeCollection taxLotIDNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[3]//tr[3]/td[2]");
                 var taxLotID = taxLotIDNode.Select(node => node.InnerText);
                 HtmlNodeCollection siteAddressNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[3]//tr[2]/td[2]");
-                var siteAddress = siteAddressNode.Select(node => node.InnerText);
+                var siteAddress = siteAddressNode.Select(node => node.InnerText).DefaultIfEmpty("");
                 HtmlNodeCollection propertyIDNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[3]//tr[4]/td[2]");
-                var propertyID = propertyIDNode.Select(node => node.InnerText);
+                var propertyID = propertyIDNode.Select(node => node.InnerText).DefaultIfEmpty("");
                 HtmlNodeCollection propertyClassNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[3]//tr[5]/td[2]/text()");
-                var propertyClass = propertyClassNode.Select(node => node.InnerText);
+                var propertyClass = propertyClassNode.Select(node => node.InnerText).DefaultIfEmpty("");
                 HtmlNodeCollection neighCodeNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[3]//tr[6]/td[2]");
-                var neighCode = neighCodeNode.Select(node => node.InnerText);
+                var neighCode = neighCodeNode.Select(node => node.InnerText).DefaultIfEmpty("");
                 HtmlNodeCollection latLongNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[3]//tr[7]/td[2]");
-                var latLong = latLongNode.Select(node => node.InnerText);
+                var latLong = latLongNode.Select(node => node.InnerText).DefaultIfEmpty("");
                 HtmlNodeCollection saleDateNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[4]//tr[3]/td[1]");
-                var saleDate = saleDateNode.Select(node => node.InnerText);
+                var saleDate = saleDateNode.Select(node => node.InnerText).DefaultIfEmpty("");
                 HtmlNodeCollection saleInstrNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[4]//tr[3]/td[2]");
-                var saleInstr = saleInstrNode.Select(node => node.InnerText);
+                var saleInstr = saleInstrNode.Select(node => node.InnerText).DefaultIfEmpty("");
                 HtmlNodeCollection saleDeedNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[4]//tr[3]/td[3]");
-                var saleDeed = saleDeedNode.Select(node => node.InnerText);
+                var saleDeed = saleDeedNode.Select(node => node.InnerText).DefaultIfEmpty("");
                 HtmlNodeCollection salePriceNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[4]//tr[3]/td[4]");
-                var salePrice = salePriceNode.Select(node => node.InnerText);
+                var salePrice = salePriceNode.Select(node => node.InnerText).DefaultIfEmpty("");
                 HtmlNodeCollection rollDateNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[2]/td[2]");
-                var rollDate = rollDateNode.Select(node => node.InnerText);
+                var rollDate = rollDateNode.Select(node => node.InnerText).DefaultIfEmpty("");
                 HtmlNodeCollection taxCodeNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[3]/td[2]");
-                var taxCode = taxCodeNode.Select(node => node.InnerText);
+                var taxCode = taxCodeNode.Select(node => node.InnerText).DefaultIfEmpty("");
                 HtmlNodeCollection marketLandValueNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[4]/td[2]");
-                var marketLandValue = marketLandValueNode.Select(node => node.InnerText);
+                var marketLandValue = marketLandValueNode.Select(node => node.InnerText).DefaultIfEmpty("");
                 HtmlNodeCollection marketBldgValueNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[5]/td[2]");
-                var marketBldgValue = marketBldgValueNode.Select(node => node.InnerText);
+                var marketBldgValue = marketBldgValueNode.Select(node => node.InnerText).DefaultIfEmpty("");
                 HtmlNodeCollection specialMarketValueNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[6]/td[2]");
-                var specialMarketValue = specialMarketValueNode.Select(node => node.InnerText);
+                var specialMarketValue = specialMarketValueNode.Select(node => node.InnerText).DefaultIfEmpty("");
                 HtmlNodeCollection marketTotalValueNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[7]/td[2]");
-                var marketTotalValue = marketTotalValueNode.Select(node => node.InnerText);
+                var marketTotalValue = marketTotalValueNode.Select(node => node.InnerText).DefaultIfEmpty("");
                 HtmlNodeCollection taxableAssessedValueNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[8]/td[2]");
-                var taxableAssessedValue = taxableAssessedValueNode.Select(node => node.InnerText);
+                var taxableAssessedValue = taxableAssessedValueNode.Select(node => node.InnerText).DefaultIfEmpty("");
                 HtmlNodeCollection legalNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[9]/td[2]");
-                var legal = legalNode.Select(node => node.InnerText);
+                var legal = legalNode.Select(node => node.InnerText).DefaultIfEmpty("");
                 HtmlNodeCollection lotSizeNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[10]/td[2]");
-                var lotSize = lotSizeNode.Select(node => node.InnerText);
+                var lotSize = lotSizeNode.Select(node => node.InnerText).DefaultIfEmpty("");
                 HtmlNodeCollection bldgSqFtNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[11]/td[2]");
-                var bldgSqFt = bldgSqFtNode.Select(node => node.InnerText);
+                var bldgSqFt = bldgSqFtNode.Select(node => node.InnerText).DefaultIfEmpty("");
                 HtmlNodeCollection yearBuiltNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[12]/td[2]");
-                var yearBuilt = yearBuiltNode.Select(node => node.InnerText);
+                var yearBuilt = yearBuiltNode.Select(node => node.InnerText).DefaultIfEmpty("");
 
                 var PropertyInfo = new Dictionary<string, string>() {
                     {"taxLotID", taxLotID.ElementAt(0) }
@@ -223,7 +223,7 @@ namespace WashCountyPropETL
 
                 Thread.Sleep(10); //wait to prevent DDOSing
                 Console.WriteLine($"Extract Data Time : {DateTime.Now}");
-            }
+                }
             return PropertiesInfo;
         }
         public static void SavePropertyData(List<Dictionary<string, string>> propertyDataSave)
