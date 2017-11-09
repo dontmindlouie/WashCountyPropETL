@@ -65,7 +65,6 @@ namespace WashCountyPropETL
             bool resultCap = false;
             bool searchFailure = false;
             string searchTerm = startTaxLot;
-
             //Traverse the county website's property search API to figure out which taxlots are valid
             for (int i = 0; i < loopcount; i++)
             {
@@ -77,7 +76,7 @@ namespace WashCountyPropETL
                 //Console.WriteLine($"search failure: {searchFailure} | resultCap: {resultCap}");
 
                 //Valid search results: verify and record taxLot IDs
-                if (resultCap == false & searchFailure == false) 
+                if (resultCap == false & searchFailure == false ) 
                 {
                     HtmlDocument htmlDoc = new HtmlDocument();
                     htmlDoc.LoadHtml(rawHtmlIDList);
@@ -149,80 +148,179 @@ namespace WashCountyPropETL
         {
             //HTMLAgilityPack and XPath to extract detailed property data
             var PropertiesInfo = new List<Dictionary<string, string>>() { };
+            string taxLotID;
+            string siteAddress;
+            string propertyID;
+            string propertyClass;
+            string neighCode;
+            string latLong;
+            string saleDate;
+            string saleInstr;
+            string saleDeed;
+            string salePrice;
+            string rollDate;
+            string taxCode;
+            string marketLandValue;
+            string marketBldgValue;
+            string specialMarketValue;
+            string marketTotalValue;
+            string taxableAssessedValue;
+            string legal;
+            string lotSize;
+            string bldgSqFt;
+            string yearBuilt;
+
             for (var i = 0; i < validTaxLotIDs.Count()-1; i++)
             { 
                 HtmlWeb hw = new HtmlWeb();
                 HtmlDocument htmlDoc = hw.Load("http://washims.co.washington.or.us/GIS/index.cfm?id=30&sid=3&IDValue=" + validTaxLotIDs[i]);
                 HtmlNodeCollection taxLotIDNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[3]//tr[3]/td[2]");
-                var taxLotID = taxLotIDNode.Select(node => node.InnerText);
-                HtmlNodeCollection siteAddressNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[3]//tr[2]/td[2]");
-                var siteAddress = siteAddressNode.Select(node => node.InnerText).DefaultIfEmpty("");
-                HtmlNodeCollection propertyIDNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[3]//tr[4]/td[2]");
-                var propertyID = propertyIDNode.Select(node => node.InnerText).DefaultIfEmpty("");
-                HtmlNodeCollection propertyClassNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[3]//tr[5]/td[2]/text()");
-                var propertyClass = propertyClassNode.Select(node => node.InnerText).DefaultIfEmpty("");
-                HtmlNodeCollection neighCodeNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[3]//tr[6]/td[2]");
-                var neighCode = neighCodeNode.Select(node => node.InnerText).DefaultIfEmpty("");
-                HtmlNodeCollection latLongNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[3]//tr[7]/td[2]");
-                var latLong = latLongNode.Select(node => node.InnerText).DefaultIfEmpty("");
-                HtmlNodeCollection saleDateNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[4]//tr[3]/td[1]");
-                var saleDate = saleDateNode.Select(node => node.InnerText).DefaultIfEmpty("");
-                HtmlNodeCollection saleInstrNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[4]//tr[3]/td[2]");
-                var saleInstr = saleInstrNode.Select(node => node.InnerText).DefaultIfEmpty("");
-                HtmlNodeCollection saleDeedNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[4]//tr[3]/td[3]");
-                var saleDeed = saleDeedNode.Select(node => node.InnerText).DefaultIfEmpty("");
-                HtmlNodeCollection salePriceNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[4]//tr[3]/td[4]");
-                var salePrice = salePriceNode.Select(node => node.InnerText).DefaultIfEmpty("");
-                HtmlNodeCollection rollDateNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[2]/td[2]");
-                var rollDate = rollDateNode.Select(node => node.InnerText).DefaultIfEmpty("");
-                HtmlNodeCollection taxCodeNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[3]/td[2]");
-                var taxCode = taxCodeNode.Select(node => node.InnerText).DefaultIfEmpty("");
-                HtmlNodeCollection marketLandValueNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[4]/td[2]");
-                var marketLandValue = marketLandValueNode.Select(node => node.InnerText).DefaultIfEmpty("");
-                HtmlNodeCollection marketBldgValueNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[5]/td[2]");
-                var marketBldgValue = marketBldgValueNode.Select(node => node.InnerText).DefaultIfEmpty("");
-                HtmlNodeCollection specialMarketValueNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[6]/td[2]");
-                var specialMarketValue = specialMarketValueNode.Select(node => node.InnerText).DefaultIfEmpty("");
-                HtmlNodeCollection marketTotalValueNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[7]/td[2]");
-                var marketTotalValue = marketTotalValueNode.Select(node => node.InnerText).DefaultIfEmpty("");
-                HtmlNodeCollection taxableAssessedValueNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[8]/td[2]");
-                var taxableAssessedValue = taxableAssessedValueNode.Select(node => node.InnerText).DefaultIfEmpty("");
-                HtmlNodeCollection legalNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[9]/td[2]");
-                var legal = legalNode.Select(node => node.InnerText).DefaultIfEmpty("");
-                HtmlNodeCollection lotSizeNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[10]/td[2]");
-                var lotSize = lotSizeNode.Select(node => node.InnerText).DefaultIfEmpty("");
-                HtmlNodeCollection bldgSqFtNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[11]/td[2]");
-                var bldgSqFt = bldgSqFtNode.Select(node => node.InnerText).DefaultIfEmpty("");
-                HtmlNodeCollection yearBuiltNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[12]/td[2]");
-                var yearBuilt = yearBuiltNode.Select(node => node.InnerText).DefaultIfEmpty("");
+                if (taxLotIDNode.Select(node => node.InnerText).ElementAtOrDefault(0) != " &nbsp;")
+                {
+                    taxLotID = taxLotIDNode.Select(node => node.InnerText).ElementAtOrDefault(0);
+                    Console.WriteLine($"TaxLot: {taxLotID}");
+                    HtmlNodeCollection siteAddressNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[3]//tr[2]/td[2]");
+                    if (siteAddressNode == null) { siteAddress = "N/A"; }
+                    else
+                    {
+                        siteAddress = siteAddressNode.Select(node => node.InnerText).ElementAtOrDefault(0);
+                    }
+                    HtmlNodeCollection propertyIDNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[3]//tr[4]/td[2]");
+                    if (propertyIDNode == null) { propertyID = "N/A"; }
+                    else
+                    {
+                        propertyID = propertyIDNode.Select(node => node.InnerText).ElementAtOrDefault(0);
+                    }
+                    HtmlNodeCollection propertyClassNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[3]//tr[5]/td[2]/text()");
+                    if (propertyClassNode == null) { propertyClass = "N/A"; }
+                    else
+                    {
+                        propertyClass = propertyClassNode.Select(node => node.InnerText).ElementAtOrDefault(0);
+                    }
+                    HtmlNodeCollection neighCodeNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[3]//tr[6]/td[2]");
+                    if (neighCodeNode == null) { neighCode = "N/A"; }
+                    else
+                    {
+                        neighCode = neighCodeNode.Select(node => node.InnerText).ElementAtOrDefault(0);
+                    }
+                    HtmlNodeCollection latLongNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[3]//tr[7]/td[2]");
+                    if (latLongNode == null) { latLong = "N/A"; }
+                    else
+                    {
+                        latLong = latLongNode.Select(node => node.InnerText).ElementAtOrDefault(0);
+                    }
+                    HtmlNodeCollection saleDateNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[4]//tr[3]/td[1]");
+                    if (saleDateNode == null) { saleDate = "N/A"; }
+                    else
+                    {
+                        saleDate = saleDateNode.Select(node => node.InnerText).ElementAtOrDefault(0);
+                    }
+                    HtmlNodeCollection saleInstrNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[4]//tr[3]/td[2]");
+                    if (saleInstrNode == null) { saleInstr = "N/A"; }
+                    else
+                    {
+                        saleInstr = saleInstrNode.Select(node => node.InnerText).ElementAtOrDefault(0);
+                    }
+                    HtmlNodeCollection saleDeedNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[4]//tr[3]/td[3]");
+                    if (saleDeedNode == null) { saleDeed = "N/A"; }
+                    else
+                    {
+                        saleDeed = saleDeedNode.Select(node => node.InnerText).ElementAtOrDefault(0);
+                    }
+                    HtmlNodeCollection salePriceNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[4]//tr[3]/td[4]");
+                    if (salePriceNode == null) { salePrice = "N/A"; }
+                    else
+                    {
+                        salePrice = salePriceNode.Select(node => node.InnerText).ElementAtOrDefault(0);
+                    }
+                    HtmlNodeCollection rollDateNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[2]/td[2]");
+                    if (rollDateNode == null) { rollDate = "N/A"; }
+                    else
+                    {
+                        rollDate = rollDateNode.Select(node => node.InnerText).ElementAtOrDefault(0);
+                    }
+                    HtmlNodeCollection taxCodeNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[3]/td[2]");
+                    if (taxCodeNode == null) { taxCode = "N/A"; }
+                    else
+                    {
+                        taxCode = taxCodeNode.Select(node => node.InnerText).ElementAtOrDefault(0);
+                    }
+                    HtmlNodeCollection marketLandValueNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[4]/td[2]");
+                    if (marketLandValueNode == null) { marketLandValue = "N/A"; }
+                    else
+                    {
+                        marketLandValue = marketLandValueNode.Select(node => node.InnerText).ElementAtOrDefault(0);
+                    }
+                    HtmlNodeCollection marketBldgValueNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[5]/td[2]");
+                    if (marketBldgValueNode == null) { marketBldgValue = "N/A"; }
+                    else
+                    {
+                        marketBldgValue = marketBldgValueNode.Select(node => node.InnerText).ElementAtOrDefault(0);
+                    }
+                    HtmlNodeCollection specialMarketValueNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[6]/td[2]");
+                    if (specialMarketValueNode == null) { specialMarketValue = "N/A"; }
+                    else
+                    {
+                        specialMarketValue = specialMarketValueNode.Select(node => node.InnerText).ElementAtOrDefault(0);
+                    }
+                    HtmlNodeCollection marketTotalValueNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[7]/td[2]");
+                    if (marketTotalValueNode == null) { marketTotalValue = "N/A"; }
+                    else
+                    {
+                        marketTotalValue = marketTotalValueNode.Select(node => node.InnerText).ElementAtOrDefault(0);
+                    }
+                    HtmlNodeCollection taxableAssessedValueNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[8]/td[2]");
+                    if (taxableAssessedValueNode == null) { taxableAssessedValue = "N/A"; }
+                    else
+                    {
+                        taxableAssessedValue = taxableAssessedValueNode.Select(node => node.InnerText).ElementAtOrDefault(0);
+                    }
+                    HtmlNodeCollection legalNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[9]/td[2]");
+                    if (legalNode == null) { legal = "N/A"; }
+                    else
+                    {
+                        legal = legalNode.Select(node => node.InnerText).ElementAtOrDefault(0);
+                    }
+                    HtmlNodeCollection lotSizeNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[10]/td[2]");
+                    if (lotSizeNode == null) { lotSize = "N/A"; }
+                    else
+                    {
+                        lotSize = lotSizeNode.Select(node => node.InnerText).ElementAtOrDefault(0);
+                    }
+                    HtmlNodeCollection bldgSqFtNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[11]/td[2]");
+                    if (bldgSqFtNode == null) { bldgSqFt = "N/A"; }
+                    else{ bldgSqFt = bldgSqFtNode.Select(node => node.InnerText).ElementAtOrDefault(0); }
+                    HtmlNodeCollection yearBuiltNode = htmlDoc.DocumentNode.SelectNodes("/html/body/table[3]//tr/td[3]/table[5]//tr[12]/td[2]");
+                    if (yearBuiltNode == null) { yearBuilt = "N/A"; }
+                    else { yearBuilt = yearBuiltNode.Select(node => node.InnerText).ElementAtOrDefault(0); }
 
-                var PropertyInfo = new Dictionary<string, string>() {
-                    {"taxLotID", taxLotID.ElementAt(0) }
-                    , {"SiteAddress", siteAddress.ElementAt(0) }
-                    , {"PropertyID", propertyID.ElementAt(0) }
-                    , {"PropertyClass", propertyClass.ElementAt(0) }
-                    , {"NeighCode", neighCode.ElementAt(0) }
-                    , {"LatLong", latLong.ElementAt(0) }
-                    , {"SaleDate", saleDate.ElementAt(0) }
-                    , {"SaleInstr", saleInstr.ElementAt(0) }
-                    , {"SaleDeed", saleDeed.ElementAt(0) }
-                    , {"SalePrice", salePrice.ElementAt(0) }
-                    , {"RollDate", rollDate.ElementAt(0) }
-                    , {"TaxCode", taxCode.ElementAt(0)}
-                    , {"MarketLandValue", marketLandValue.ElementAt(0) }
-                    , {"MarketBuildingValue", marketBldgValue.ElementAt(0) }
-                    , {"SpecialMarketValue", specialMarketValue.ElementAt(0) }
-                    , {"MarketTotalValue", marketTotalValue.ElementAt(0) }
-                    , {"TaxableAssessedValue", taxableAssessedValue.ElementAt(0) }
-                    , {"Legal", legal.ElementAt(0) }
-                    , {"LotSize", lotSize.ElementAt(0) }
-                    , {"BldgSqFt", bldgSqFt.ElementAt(0) }
-                    , {"YearBuilt", yearBuilt.ElementAt(0) }
+                    var PropertyInfo = new Dictionary<string, string>() {
+                    {"taxLotID", taxLotID }
+                    , {"SiteAddress", siteAddress }//.ElementAt(0) }
+                    , {"PropertyID", propertyID }//.ElementAt(0) }
+                    , {"PropertyClass", propertyClass }//.ElementAt(0) }
+                    , {"NeighCode", neighCode }//.ElementAt(0) }
+                    , {"LatLong", latLong }//.ElementAt(0) }
+                    , {"SaleDate", saleDate }//.ElementAt(0) }
+                    , {"SaleInstr", saleInstr }//.ElementAt(0) }
+                    , {"SaleDeed", saleDeed }//.ElementAt(0) }
+                    , {"SalePrice", salePrice }//.ElementAt(0) }
+                    , {"RollDate", rollDate }//.ElementAt(0) }
+                    , {"TaxCode", taxCode }//.ElementAt(0)}
+                    , {"MarketLandValue", marketLandValue }//.ElementAt(0) }
+                    , {"MarketBuildingValue", marketBldgValue }//.ElementAt(0) }
+                    , {"SpecialMarketValue", specialMarketValue }//.ElementAt(0) }
+                    , {"MarketTotalValue", marketTotalValue }//.ElementAt(0) }
+                    , {"TaxableAssessedValue", taxableAssessedValue }//.ElementAt(0) }
+                    , {"Legal", legal }//.ElementAt(0) }
+                    , {"LotSize", lotSize }//.ElementAt(0) }
+                    , {"BldgSqFt", bldgSqFt }//.ElementAt(0) }
+                    , {"YearBuilt", yearBuilt }//.ElementAt(0) }
                 };
-                PropertiesInfo.Add(PropertyInfo);
-
-                Thread.Sleep(10); //wait to prevent DDOSing
-                Console.WriteLine($"Extract Data Time : {DateTime.Now}");
+                    PropertiesInfo.Add(PropertyInfo);
+                    Thread.Sleep(10); //wait to prevent DDOSing
+                    Console.WriteLine($"Extract Data Time : {DateTime.Now}");
+                };
                 }
             return PropertiesInfo;
         }
